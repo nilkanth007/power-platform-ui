@@ -1,0 +1,21 @@
+<div class="page-header" style="display: flex; align-items: center; gap: 1rem;">
+  <a [routerLink]="['/flows', envId]" style="background: var(--surface-color); padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m15 18-6-6 6-6"/>
+    </svg>
+  </a>
+  <div>
+    <h1 class="page-title">Flow Definition</h1>
+    <p class="page-subtitle">ID: {{ flowId }}</p>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="spinner"></div>
+
+<div *ngIf="error" class="card" style="border-color: #ef4444; color: #fca5a5;">
+  {{ error }}
+</div>
+
+<div class="card" *ngIf="!isLoading && !error" style="overflow-x: auto;">
+  <pre style="color: #a78bfa; font-family: monospace; font-size: 0.875rem;"><code>{{ definitionJson }}</code></pre>
+</div>

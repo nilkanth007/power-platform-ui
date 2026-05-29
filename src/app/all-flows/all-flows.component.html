@@ -1,0 +1,40 @@
+<div class="page-header">
+  <h1 class="page-title">All Flows</h1>
+  <p class="page-subtitle">Search and view flows across all environments.</p>
+</div>
+
+<div class="search-container" style="margin-bottom: 2rem;">
+  <input 
+    type="text" 
+    [(ngModel)]="searchQuery" 
+    placeholder="Search by flow name, environment, state, or ID..." 
+    class="search-input"
+  />
+</div>
+
+<div *ngIf="isLoading" class="spinner"></div>
+
+<div *ngIf="error" class="card" style="border-color: #ef4444; color: #fca5a5;">
+  {{ error }}
+</div>
+
+<div class="grid" *ngIf="!isLoading && !error">
+  <div *ngIf="filteredFlows.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+    No flows match your search.
+  </div>
+
+  <a *ngFor="let flow of filteredFlows" [routerLink]="['/flow-definition', flow.envId, flow.flowId]" class="card">
+    <h3 style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+      {{ flow.flowName || 'Unnamed Flow' }}
+      <span class="badge" [style.background-color]="flow.state === 'Started' ? '#10b981' : '#6b7280'">
+        {{ flow.state }}
+      </span>
+    </h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">
+      <span style="color: #cbd5e1;">Environment:</span> {{ flow.envName }}
+    </p>
+    <p style="color: var(--text-muted); font-size: 0.875rem;">
+      <span style="color: #cbd5e1;">ID:</span> {{ flow.flowId }}
+    </p>
+  </a>
+</div>

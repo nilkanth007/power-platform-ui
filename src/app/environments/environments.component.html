@@ -1,0 +1,25 @@
+<div class="page-header">
+  <h1 class="page-title">Environments</h1>
+  <p class="page-subtitle">Select a Power Platform environment to view its flows.</p>
+</div>
+
+<div *ngIf="isLoading" class="spinner"></div>
+
+<div *ngIf="error" class="card" style="border-color: #ef4444; color: #fca5a5;">
+  {{ error }}
+</div>
+
+<div class="grid" *ngIf="!isLoading && !error">
+  <a *ngFor="let env of environments" [routerLink]="['/flows', env.environmentId]" class="card">
+    <h3 style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+      {{ env.environmentName || 'Unnamed' }}
+      <span class="badge">{{ env.type }}</span>
+    </h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem;">
+      ID: {{ env.environmentId }}
+    </p>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+      Location: {{ env.location }}
+    </p>
+  </a>
+</div>

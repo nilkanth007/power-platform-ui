@@ -1,0 +1,19 @@
+<nav class="navbar">
+  <div class="container nav-container" style="justify-content: space-between;">
+    <a routerLink="/" class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      Power Platform Explorer
+    </a>
+    
+    <div style="display: flex; gap: 1.5rem;">
+      <a routerLink="/environments" routerLinkActive="active" style="font-weight: 500;">Environments</a>
+      <a routerLink="/all-flows" routerLinkActive="active" style="font-weight: 500;">All Flows</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+  <router-outlet></router-outlet>
+</main>
