@@ -1,0 +1,20 @@
+.error-card {
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.env-title {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.env-metadata {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.env-location {
+  margin-top: 0.5rem;
+}

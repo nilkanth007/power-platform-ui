@@ -1,0 +1,45 @@
+.flows-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-link {
+  background: var(--surface-color);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  display: flex;
+}
+
+.error-card {
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.flow-card-title {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.badge.started {
+  background-color: #10b981;
+}
+
+.badge.stopped {
+  background-color: #6b7280;
+}
+
+.flow-id-text {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}

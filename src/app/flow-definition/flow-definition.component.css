@@ -1,0 +1,29 @@
+.definition-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-link {
+  background: var(--surface-color);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  display: flex;
+}
+
+.error-card {
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.definition-card {
+  overflow-x: auto;
+}
+
+.definition-pre {
+  color: #a78bfa;
+  font-family: monospace;
+  font-size: 0.875rem;
+  margin: 0;
+}

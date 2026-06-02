@@ -407,3 +407,9 @@
   border-radius: 4px;
 }
 
+.secret-icon {
+  margin-right: 0.4rem;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
