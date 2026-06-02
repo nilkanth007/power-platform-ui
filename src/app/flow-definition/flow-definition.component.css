@@ -26,4 +26,105 @@
   font-family: monospace;
   font-size: 0.875rem;
   margin: 0;
+  user-select: text; /* Enable selection explicitly */
+  cursor: text;      /* Show I-beam cursor for selecting text */
+}
+
+/* Search container styles */
+.search-container {
+  margin-bottom: 1.5rem;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 9rem 0.75rem 2.5rem; /* Large right padding to prevent text overlap with search controls */
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  font-size: 0.875rem;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.search-controls {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.match-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  margin-right: 0.25rem;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.nav-btn:hover:not([disabled]) {
+  color: var(--text-color);
+  background-color: var(--surface-hover);
+}
+
+.nav-btn[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Highlight styles */
+::ng-deep mark.search-match {
+  background-color: rgba(245, 158, 11, 0.4); /* Subtle transparent yellow for all matches */
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+::ng-deep mark.search-match.current-match {
+  background-color: #10b981; /* Neon green for the active scrolled-to match */
+  color: #ffffff;
+  font-weight: bold;
+  box-shadow: 0 0 0 2px #047857;
+}
+
+.definition-pre:focus {
+  outline: none;
 }
