@@ -75,30 +75,30 @@
       <thead>
         <tr>
           <th (click)="setSort('objectId')">
-            objectId
+            Id
             <span class="sort-icon" *ngIf="sortField === 'objectId'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
           </th>
           <th (click)="setSort('objectName')">
-            objectName
+            Flow Name
             <span class="sort-icon" *ngIf="sortField === 'objectName'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
           </th>
           <th (click)="setSort('objectCreated')">
-            objectCreated
+            Created Date    
             <span class="sort-icon" *ngIf="sortField === 'objectCreated'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
           </th>
           <th (click)="setSort('objectModified')">
-            objectModified
+            Modified Date
             <span class="sort-icon" *ngIf="sortField === 'objectModified'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
           </th>
           <th>
-            objectLink
+            Link
           </th>
           <th (click)="setSort('objectType')">
-            objectType
+            Type
             <span class="sort-icon" *ngIf="sortField === 'objectType'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
           </th>
           <th (click)="setSort('environmentName')">
-            environmentName
+            Environment
             <span class="sort-icon" *ngIf="sortField === 'environmentName'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
           </th>
         </tr>
