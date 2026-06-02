@@ -1,0 +1,60 @@
+<div class="page-header">
+  <h1 class="page-title">Key Vault Secrets</h1>
+  <p class="page-subtitle">View secrets from Azure Key Vaults across all environments.</p>
+</div>
+
+<div class="search-container" style="margin-bottom: 2rem;">
+  <input
+    type="text"
+    [(ngModel)]="searchQuery"
+    placeholder="Search by secret name, vault, environment..."
+    class="search-input"
+  />
+</div>
+
+<div *ngIf="isLoading" class="spinner"></div>
+
+<div *ngIf="error" class="card" style="border-color: #ef4444; color: #fca5a5;">
+  {{ error }}
+</div>
+
+<div class="secrets-table-wrapper" *ngIf="!isLoading && !error">
+  <div *ngIf="filteredSecrets.length === 0" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+    No secrets match your search.
+  </div>
+
+  <table class="secrets-table" *ngIf="filteredSecrets.length > 0">
+    <thead>
+      <tr>
+        <th>Secret Name</th>
+        <th>Value</th>
+        <th>Vault</th>
+        <th>Environment</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let secret of filteredSecrets">
+        <td>
+          <span style="font-weight: 600; color: var(--text-color);">{{ secret.secretName }}</span>
+        </td>
+        <td>
+          <code class="secret-value">
+            {{ isRevealed(secret.secretName) ? secret.secretValue : maskValue(secret.secretValue) }}
+          </code>
+        </td>
+        <td>
+          <span class="badge" style="background-color: #6366f1;">{{ secret.vaultName }}</span>
+        </td>
+        <td>
+          <span style="color: var(--text-muted);">{{ secret.environmentName }}</span>
+        </td>
+        <td>
+          <button class="btn-reveal" (click)="toggleReveal(secret.secretName)">
+            {{ isRevealed(secret.secretName) ? 'Hide' : 'Reveal' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

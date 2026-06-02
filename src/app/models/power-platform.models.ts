@@ -16,3 +16,11 @@ export interface FlowDefinition {
     definition: any;
   };
 }
+
+export interface KeyVaultSecret {
+  secretName: string;
+  secretValue: string;
+  vaultName: string;
+  environmentName: string;
+  environmentId: string;
+}

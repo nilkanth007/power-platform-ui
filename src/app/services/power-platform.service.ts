@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Environment, Flow, FlowDefinition } from '../models/power-platform.models';
+import { Environment, Flow, FlowDefinition, KeyVaultSecret } from '../models/power-platform.models';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -82,4 +82,23 @@ export class PowerPlatformService {
       })
     );
   }
+
+  getKeyVaultSecrets(): Observable<KeyVaultSecret[]> {
+    return this.http.get<KeyVaultSecret[]>(`${this.apiUrl}/keyvault/secrets`).pipe(
+      catchError(err => {
+        console.warn('API getKeyVaultSecrets failed, returning dummy data', err);
+        return of([
+          { secretName: 'DatabaseConnectionString', secretValue: 'Server=prod-sql.database.windows.net;Database=AppDB;...', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456' },
+          { secretName: 'ApiKey-SendGrid', secretValue: 'SG.xxxxxxxxxxxxxxxxxxxx', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456' },
+          { secretName: 'StorageAccountKey', secretValue: 'DefaultEndpointsProtocol=https;AccountName=...', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456' },
+          { secretName: 'JwtSigningKey', secretValue: 'a1b2c3d4e5f6g7h8i9j0...', vaultName: 'kv-dev-eu', environmentName: 'Development EU', environmentId: 'Dev-789' },
+          { secretName: 'SmtpPassword', secretValue: 'P@ssw0rd!Encrypted', vaultName: 'kv-dev-eu', environmentName: 'Development EU', environmentId: 'Dev-789' },
+          { secretName: 'CosmosDbKey', secretValue: 'AccountEndpoint=https://cosmos-prod.documents.azure.com:443/;AccountKey=...', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123' },
+          { secretName: 'RedisConnectionString', secretValue: 'redis-prod.redis.cache.windows.net:6380,password=...', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123' },
+          { secretName: 'AppInsightsKey', secretValue: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123' }
+        ]);
+      })
+    );
+  }
 }
+

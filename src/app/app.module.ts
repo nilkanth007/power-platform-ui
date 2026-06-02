@@ -9,6 +9,7 @@ import { EnvironmentsComponent } from './environments/environments.component';
 import { FlowsComponent } from './flows/flows.component';
 import { FlowDefinitionComponent } from './flow-definition/flow-definition.component';
 import { AllFlowsComponent } from './all-flows/all-flows.component';
+import { KeyVaultsComponent } from './key-vaults/key-vaults.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { AllFlowsComponent } from './all-flows/all-flows.component';
     EnvironmentsComponent,
     FlowsComponent,
     FlowDefinitionComponent,
-    AllFlowsComponent
+    AllFlowsComponent,
+    KeyVaultsComponent
   ],
   imports: [
     BrowserModule,
