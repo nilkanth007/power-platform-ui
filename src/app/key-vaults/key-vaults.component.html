@@ -1,60 +1,239 @@
 <div class="page-header">
   <h1 class="page-title">Key Vault Secrets</h1>
-  <p class="page-subtitle">View secrets from Azure Key Vaults across all environments.</p>
+  <p class="page-subtitle">Browse and search all Azure Key Vault secrets across every environment.</p>
 </div>
 
-<div class="search-container" style="margin-bottom: 2rem;">
-  <input
-    type="text"
-    [(ngModel)]="searchQuery"
-    placeholder="Search by secret name, vault, environment..."
-    class="search-input"
-  />
-</div>
-
+<!-- Loading / Error -->
 <div *ngIf="isLoading" class="spinner"></div>
+<div *ngIf="error" class="card error-card">{{ error }}</div>
 
-<div *ngIf="error" class="card" style="border-color: #ef4444; color: #fca5a5;">
-  {{ error }}
-</div>
+<ng-container *ngIf="!isLoading && !error">
 
-<div class="secrets-table-wrapper" *ngIf="!isLoading && !error">
-  <div *ngIf="filteredSecrets.length === 0" style="text-align: center; padding: 3rem; color: var(--text-muted);">
-    No secrets match your search.
+  <!-- Toolbar -->
+  <div class="toolbar">
+
+    <!-- Search -->
+    <div class="search-wrapper">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Search by key name, vault, environment, content type..."
+        class="search-input search-input-icon"
+      />
+    </div>
+
+    <!-- Filter row -->
+    <div class="filter-row">
+      <div class="filter-group">
+        <label class="filter-label">Environment</label>
+        <select [(ngModel)]="filterEnvironment" class="filter-select">
+          <option value="">All environments</option>
+          <option *ngFor="let env of environments" [value]="env">{{ env }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Vault</label>
+        <select [(ngModel)]="filterVault" class="filter-select">
+          <option value="">All vaults</option>
+          <option *ngFor="let v of vaults" [value]="v">{{ v }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select [(ngModel)]="filterEnabled" class="filter-select">
+          <option value="">All</option>
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </select>
+      </div>
+
+      <button
+        *ngIf="activeFilterCount > 0"
+        (click)="clearFilters()"
+        class="clear-btn">
+        Clear ({{ activeFilterCount }})
+      </button>
+
+      <!-- View toggle -->
+      <div class="view-toggle">
+        <button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" title="Table view">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+        </button>
+        <button [class.active]="viewMode === 'grouped'" (click)="viewMode = 'grouped'" title="Group by environment">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <p class="summary-text">
+      Showing <strong>{{ filteredSecrets.length }}</strong> of <strong>{{ allSecrets.length }}</strong> secrets
+    </p>
   </div>
 
-  <table class="secrets-table" *ngIf="filteredSecrets.length > 0">
-    <thead>
-      <tr>
-        <th>Secret Name</th>
-        <th>Value</th>
-        <th>Vault</th>
-        <th>Environment</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let secret of filteredSecrets">
-        <td>
-          <span style="font-weight: 600; color: var(--text-color);">{{ secret.secretName }}</span>
-        </td>
-        <td>
-          <code class="secret-value">
-            {{ isRevealed(secret.secretName) ? secret.secretValue : maskValue(secret.secretValue) }}
-          </code>
-        </td>
-        <td>
-          <span class="badge" style="background-color: #6366f1;">{{ secret.vaultName }}</span>
-        </td>
-        <td>
-          <span style="color: var(--text-muted);">{{ secret.environmentName }}</span>
-        </td>
-        <td>
-          <button class="btn-reveal" (click)="toggleReveal(secret.secretName)">
-            {{ isRevealed(secret.secretName) ? 'Hide' : 'Reveal' }}
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+  <!-- Empty state -->
+  <div *ngIf="filteredSecrets.length === 0" class="empty-state">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+      style="color: var(--text-muted); margin-bottom: 1rem;">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+    <p>No secrets match your filters.</p>
+    <button (click)="clearFilters()" class="clear-btn" style="margin-top: 0.5rem;">Clear filters</button>
+  </div>
+
+  <!-- ── TABLE VIEW ── -->
+  <div *ngIf="viewMode === 'table' && filteredSecrets.length > 0" class="table-wrapper">
+    <table class="secrets-table">
+      <thead>
+        <tr>
+          <th (click)="setSort('secretName')" class="sortable">
+            Secret Name
+            <span class="sort-icon" *ngIf="sortField === 'secretName'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th style="min-width: 200px;">Value</th>
+          <th (click)="setSort('vaultName')" class="sortable">
+            Vault
+            <span class="sort-icon" *ngIf="sortField === 'vaultName'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th (click)="setSort('environmentName')" class="sortable">
+            Environment
+            <span class="sort-icon" *ngIf="sortField === 'environmentName'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th (click)="setSort('contentType')" class="sortable">
+            Content Type
+            <span class="sort-icon" *ngIf="sortField === 'contentType'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th (click)="setSort('enabled')" class="sortable">
+            Status
+            <span class="sort-icon" *ngIf="sortField === 'enabled'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th>Expires</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of filteredSecrets">
+          <td class="secret-name">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              style="margin-right: 0.4rem; color: var(--primary-color); flex-shrink: 0;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            {{ s.secretName }}
+          </td>
+          <td class="secret-value-cell">
+            <span class="secret-value">{{ isRevealed(s) ? s.secretValue : maskValue(s.secretValue) }}</span>
+            <button class="reveal-btn" (click)="toggleReveal(s)" [title]="isRevealed(s) ? 'Hide value' : 'Show value'">
+              <svg *ngIf="!isRevealed(s)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg *ngIf="isRevealed(s)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                <line x1="2" y1="2" x2="22" y2="22"/>
+              </svg>
+            </button>
+          </td>
+          <td>
+            <span class="vault-chip">{{ s.vaultName }}</span>
+          </td>
+          <td>{{ s.environmentName }}</td>
+          <td>
+            <span *ngIf="s.contentType" class="content-type-chip">{{ s.contentType }}</span>
+            <span *ngIf="!s.contentType" style="color: var(--text-muted); font-size: 0.8rem;">—</span>
+          </td>
+          <td>
+            <span class="status-badge" [class.enabled]="s.enabled" [class.disabled]="!s.enabled">
+              {{ s.enabled ? 'Enabled' : 'Disabled' }}
+            </span>
+          </td>
+          <td style="color: var(--text-muted); font-size: 0.8rem;">
+            <span *ngIf="s.expiresOn">{{ s.expiresOn | date:'mediumDate' }}</span>
+            <span *ngIf="!s.expiresOn">Never</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── GROUPED VIEW ── -->
+  <div *ngIf="viewMode === 'grouped' && filteredSecrets.length > 0" class="grouped-view">
+    <div *ngFor="let group of groupedByEnvironment" class="env-group">
+      <div class="env-group-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+        <span>{{ group.env }}</span>
+        <span class="count-chip">{{ group.secrets.length }}</span>
+      </div>
+
+      <div class="vault-subgroups">
+        <div *ngFor="let vault of getVaultsForGroup(group.secrets)" class="vault-subgroup">
+          <div class="vault-subgroup-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+            </svg>
+            {{ vault }}
+            <span class="count-chip sm">{{ getSecretsForVault(group.secrets, vault).length }}</span>
+          </div>
+
+          <div class="secret-cards">
+            <div *ngFor="let s of getSecretsForVault(group.secrets, vault)" class="secret-card">
+              <div class="secret-card-name">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                {{ s.secretName }}
+              </div>
+              <div class="secret-card-value">
+                <span class="value-text">{{ isRevealed(s) ? s.secretValue : maskValue(s.secretValue) }}</span>
+                <button class="reveal-btn sm" (click)="toggleReveal(s)" [title]="isRevealed(s) ? 'Hide value' : 'Show value'">
+                  <svg *ngIf="!isRevealed(s)" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg *ngIf="isRevealed(s)" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="secret-card-meta">
+                <span class="status-badge sm" [class.enabled]="s.enabled" [class.disabled]="!s.enabled">
+                  {{ s.enabled ? 'On' : 'Off' }}
+                </span>
+                <span *ngIf="s.contentType" class="content-type-chip sm">{{ s.contentType }}</span>
+                <span *ngIf="s.expiresOn" style="font-size: 0.75rem; color: var(--text-muted);">
+                  Exp: {{ s.expiresOn | date:'shortDate' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ng-container>

@@ -30,10 +30,44 @@ export class PowerPlatformService {
     return this.http.get<Flow[]>(`${this.apiUrl}/flows/environment/${envId}`).pipe(
       catchError(err => {
         console.warn(`API getFlows failed for ${envId}, returning dummy data`, err);
+        const envName = envId === 'Default-123' ? 'Default (Contoso)' : envId === 'Prod-456' ? 'Production US' : 'Development EU';
         return of([
-          { flowId: `flow-abc-${envId}`, flowName: 'Invoice Approval Process', state: 'Started' },
-          { flowId: `flow-def-${envId}`, flowName: 'Weekly Status Report', state: 'Started' },
-          { flowId: `flow-ghi-${envId}`, flowName: 'Data Sync (Deprecated)', state: 'Stopped' }
+          { 
+            flowId: `flow-abc-${envId}`, 
+            flowName: 'Invoice Approval Process', 
+            state: 'Started',
+            objectId: `flow-abc-${envId}`,
+            objectName: 'Invoice Approval Process',
+            objectCreated: '2023-01-19T09:03:00Z',
+            objectModified: '2023-04-21T08:07:00Z',
+            objectLink: `https://make.powerautomate.com/environments/${envId}/flows/flow-abc-${envId}/details`,
+            objectType: 'Flow',
+            environmentName: envName
+          },
+          { 
+            flowId: `flow-def-${envId}`, 
+            flowName: 'Weekly Status Report', 
+            state: 'Started',
+            objectId: `flow-def-${envId}`,
+            objectName: 'Weekly Status Report',
+            objectCreated: '2021-11-23T11:27:00Z',
+            objectModified: '2023-03-17T11:53:00Z',
+            objectLink: `https://make.powerautomate.com/environments/${envId}/flows/flow-def-${envId}/details`,
+            objectType: 'Flow',
+            environmentName: envName
+          },
+          { 
+            flowId: `flow-ghi-${envId}`, 
+            flowName: 'Data Sync (Deprecated)', 
+            state: 'Stopped',
+            objectId: `flow-ghi-${envId}`,
+            objectName: 'Data Sync (Deprecated)',
+            objectCreated: '2023-02-23T11:35:00Z',
+            objectModified: '2023-02-23T13:07:00Z',
+            objectLink: `https://make.powerautomate.com/environments/${envId}/flows/flow-ghi-${envId}/details`,
+            objectType: 'Flow',
+            environmentName: envName
+          }
         ]);
       })
     );
@@ -88,14 +122,14 @@ export class PowerPlatformService {
       catchError(err => {
         console.warn('API getKeyVaultSecrets failed, returning dummy data', err);
         return of([
-          { secretName: 'DatabaseConnectionString', secretValue: 'Server=prod-sql.database.windows.net;Database=AppDB;...', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456' },
-          { secretName: 'ApiKey-SendGrid', secretValue: 'SG.xxxxxxxxxxxxxxxxxxxx', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456' },
-          { secretName: 'StorageAccountKey', secretValue: 'DefaultEndpointsProtocol=https;AccountName=...', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456' },
-          { secretName: 'JwtSigningKey', secretValue: 'a1b2c3d4e5f6g7h8i9j0...', vaultName: 'kv-dev-eu', environmentName: 'Development EU', environmentId: 'Dev-789' },
-          { secretName: 'SmtpPassword', secretValue: 'P@ssw0rd!Encrypted', vaultName: 'kv-dev-eu', environmentName: 'Development EU', environmentId: 'Dev-789' },
-          { secretName: 'CosmosDbKey', secretValue: 'AccountEndpoint=https://cosmos-prod.documents.azure.com:443/;AccountKey=...', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123' },
-          { secretName: 'RedisConnectionString', secretValue: 'redis-prod.redis.cache.windows.net:6380,password=...', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123' },
-          { secretName: 'AppInsightsKey', secretValue: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123' }
+          { secretName: 'DatabaseConnectionString', secretValue: 'Server=prod-sql.database.windows.net;Database=AppDB;...', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456', contentType: 'connection-string', enabled: true },
+          { secretName: 'ApiKey-SendGrid', secretValue: 'SG.xxxxxxxxxxxxxxxxxxxx', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456', contentType: 'api-key', enabled: true, expiresOn: '2026-12-31T00:00:00Z' },
+          { secretName: 'StorageAccountKey', secretValue: 'DefaultEndpointsProtocol=https;AccountName=...', vaultName: 'kv-prod-us', environmentName: 'Production US', environmentId: 'Prod-456', contentType: 'storage-key', enabled: false },
+          { secretName: 'JwtSigningKey', secretValue: 'a1b2c3d4e5f6g7h8i9j0...', vaultName: 'kv-dev-eu', environmentName: 'Development EU', environmentId: 'Dev-789', contentType: 'certificate', enabled: true },
+          { secretName: 'SmtpPassword', secretValue: 'P@ssw0rd!Encrypted', vaultName: 'kv-dev-eu', environmentName: 'Development EU', environmentId: 'Dev-789', contentType: 'password', enabled: true, expiresOn: '2025-06-01T00:00:00Z' },
+          { secretName: 'CosmosDbKey', secretValue: 'AccountEndpoint=https://cosmos-prod.documents.azure.com:443/;AccountKey=...', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123', contentType: 'connection-string', enabled: true },
+          { secretName: 'RedisConnectionString', secretValue: 'redis-prod.redis.cache.windows.net:6380,password=...', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123', contentType: 'connection-string', enabled: true },
+          { secretName: 'AppInsightsKey', secretValue: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', vaultName: 'kv-default', environmentName: 'Default (Contoso)', environmentId: 'Default-123', contentType: 'instrumentation-key', enabled: true }
         ]);
       })
     );

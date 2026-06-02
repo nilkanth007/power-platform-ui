@@ -1,40 +1,146 @@
 <div class="page-header">
   <h1 class="page-title">All Flows</h1>
-  <p class="page-subtitle">Search and view flows across all environments.</p>
+  <p class="page-subtitle">Browse and search all Power Platform flows across every environment.</p>
 </div>
 
-<div class="search-container" style="margin-bottom: 2rem;">
-  <input 
-    type="text" 
-    [(ngModel)]="searchQuery" 
-    placeholder="Search by flow name, environment, state, or ID..." 
-    class="search-input"
-  />
+<!-- Toolbar containing Search and Dropdown Filters -->
+<div class="toolbar" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+
+  <!-- Search -->
+  <div class="search-wrapper" style="position: relative;">
+    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input 
+      type="text" 
+      [(ngModel)]="searchQuery" 
+      placeholder="Search by flow name, environment, ID, or type..." 
+      class="search-input"
+      style="width: 100%; padding: 1rem 1.5rem 1rem 2.75rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); background-color: var(--surface-color); color: var(--text-color); font-size: 1rem; font-family: inherit; box-shadow: var(--shadow-sm); transition: border-color 0.2s ease, box-shadow 0.2s ease;"
+    />
+  </div>
+
+  <!-- Filter row -->
+  <div class="filter-row" style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
+    <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+      <label class="filter-label" style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Environment</label>
+      <select [(ngModel)]="filterEnvironment" class="filter-select" style="padding: 0.5rem 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--surface-color); color: var(--text-color); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s;">
+        <option value="">All environments</option>
+        <option *ngFor="let env of environments" [value]="env">{{ env }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+      <label class="filter-label" style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">State</label>
+      <select [(ngModel)]="filterState" class="filter-select" style="padding: 0.5rem 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--surface-color); color: var(--text-color); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s;">
+        <option value="">All states</option>
+        <option *ngFor="let s of states" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <button
+      *ngIf="activeFilterCount > 0"
+      (click)="clearFilters()"
+      class="clear-btn"
+      style="align-self: flex-end; padding: 0.5rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s, color 0.2s;">
+      Clear ({{ activeFilterCount }})
+    </button>
+  </div>
+
 </div>
 
+<!-- Loading / Error -->
 <div *ngIf="isLoading" class="spinner"></div>
-
-<div *ngIf="error" class="card" style="border-color: #ef4444; color: #fca5a5;">
+<div *ngIf="error" class="card error-card" style="border-color: #ef4444; color: #fca5a5; margin-bottom: 1.5rem;">
   {{ error }}
 </div>
 
-<div class="grid" *ngIf="!isLoading && !error">
-  <div *ngIf="filteredFlows.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
-    No flows match your search.
+<ng-container *ngIf="!isLoading && !error">
+  <!-- Summary -->
+  <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+    Showing <strong>{{ filteredFlows.length }}</strong> flows
+  </p>
+
+  <!-- Empty state -->
+  <div *ngIf="filteredFlows.length === 0" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted); display: flex; flex-direction: column; align-items: center;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+      style="color: var(--text-muted); margin-bottom: 1rem;">
+      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </svg>
+    <p>No flows match your search.</p>
   </div>
 
-  <a *ngFor="let flow of filteredFlows" [routerLink]="['/flow-definition', flow.envId, flow.flowId]" class="card">
-    <h3 style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
-      {{ flow.flowName || 'Unnamed Flow' }}
-      <span class="badge" [style.background-color]="flow.state === 'Started' ? '#10b981' : '#6b7280'">
-        {{ flow.state }}
-      </span>
-    </h3>
-    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">
-      <span style="color: #cbd5e1;">Environment:</span> {{ flow.envName }}
-    </p>
-    <p style="color: var(--text-muted); font-size: 0.875rem;">
-      <span style="color: #cbd5e1;">ID:</span> {{ flow.flowId }}
-    </p>
-  </a>
-</div>
+  <!-- Table View -->
+  <div *ngIf="filteredFlows.length > 0" class="table-wrapper" style="overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+    <table class="secrets-table" style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+      <thead style="background: var(--surface-color);">
+        <tr>
+          <th (click)="setSort('objectId')" style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); cursor: pointer; user-select: none; white-space: nowrap;">
+            objectId
+            <span style="margin-left: 0.25rem; color: var(--primary-color);" *ngIf="sortField === 'objectId'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th (click)="setSort('objectName')" style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); cursor: pointer; user-select: none; white-space: nowrap;">
+            objectName
+            <span style="margin-left: 0.25rem; color: var(--primary-color);" *ngIf="sortField === 'objectName'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th (click)="setSort('objectCreated')" style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); cursor: pointer; user-select: none; white-space: nowrap;">
+            objectCreated
+            <span style="margin-left: 0.25rem; color: var(--primary-color);" *ngIf="sortField === 'objectCreated'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th (click)="setSort('objectModified')" style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); cursor: pointer; user-select: none; white-space: nowrap;">
+            objectModified
+            <span style="margin-left: 0.25rem; color: var(--primary-color);" *ngIf="sortField === 'objectModified'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); white-space: nowrap;">
+            objectLink
+          </th>
+          <th (click)="setSort('objectType')" style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); cursor: pointer; user-select: none; white-space: nowrap;">
+            objectType
+            <span style="margin-left: 0.25rem; color: var(--primary-color);" *ngIf="sortField === 'objectType'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+          <th (click)="setSort('environmentName')" style="padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); cursor: pointer; user-select: none; white-space: nowrap;">
+            environmentName
+            <span style="margin-left: 0.25rem; color: var(--primary-color);" *ngIf="sortField === 'environmentName'">{{ sortDir === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let flow of filteredFlows" style="border-bottom: 1px solid rgba(51, 65, 85, 0.5); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='var(--surface-hover)'" onmouseout="this.style.backgroundColor='transparent'">
+          <td style="padding: 0.75rem 1rem; font-family: 'Courier New', monospace; font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">
+            {{ flow.objectId }}
+          </td>
+          <td style="padding: 0.75rem 1rem; font-weight: 500; color: var(--text-color);">
+            <a [routerLink]="['/flow-definition', flow.envId, flow.flowId]" style="color: var(--text-color); font-weight: 500;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--text-color)'">
+              {{ flow.objectName || 'Unnamed Flow' }}
+            </a>
+          </td>
+          <td style="padding: 0.75rem 1rem; color: var(--text-muted); font-size: 0.8rem; white-space: nowrap;">
+            {{ flow.objectCreated | date:'dd/MM/yyyy hh:mm a' }}
+          </td>
+          <td style="padding: 0.75rem 1rem; color: var(--text-muted); font-size: 0.8rem; white-space: nowrap;">
+            {{ flow.objectModified | date:'dd/MM/yyyy hh:mm a' }}
+          </td>
+          <td style="padding: 0.75rem 1rem; font-size: 0.8rem; white-space: nowrap; max-width: 250px; overflow: hidden; text-overflow: ellipsis;">
+            <a [href]="flow.objectLink" target="_blank" style="color: var(--primary-color); display: inline-flex; align-items: center; gap: 0.25rem;">
+              <span>Link</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              </svg>
+            </a>
+          </td>
+          <td style="padding: 0.75rem 1rem; white-space: nowrap;">
+            <span style="display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3);">
+              {{ flow.objectType }}
+            </span>
+          </td>
+          <td style="padding: 0.75rem 1rem; font-weight: 500; color: #cbd5e1; white-space: nowrap;">
+            {{ flow.environmentName }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ng-container>
