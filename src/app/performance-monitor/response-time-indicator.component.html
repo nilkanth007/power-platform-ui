@@ -1,0 +1,84 @@
+<ng-container *ngIf="monitor.config.enabled">
+  <ng-container *ngIf="{ t: monitor.timing$ | async, busy: monitor.measuring$ | async } as vm">
+
+    <!-- floating badge -->
+    <button class="prt-badge" *ngIf="vm.t || vm.busy"
+            [class.left]="monitor.config.position === 'bottom-left'"
+            [ngClass]="vm.busy ? 'measuring' : badgeClass(vm.t)"
+            (click)="openDialog(vm.t)"
+            title="Page response time – click for details">
+      <span *ngIf="vm.busy" class="prt-spin" aria-label="Measuring"></span>
+      <span *ngIf="!vm.busy" class="prt-badge-icon">{{ badgeIcon(vm.t) }}</span>
+      <ng-container *ngIf="vm.t; else measuringTxt">{{ vm.t.responseTime }} ms</ng-container>
+      <ng-template #measuringTxt>&#8230;</ng-template>
+    </button>
+
+    <!-- dialog -->
+    <div class="prt-overlay" *ngIf="open && vm.t as t" (click)="open = false">
+      <div class="prt-dialog" role="dialog" aria-label="Browser response time"
+           (click)="$event.stopPropagation()">
+
+        <div class="prt-header">
+          <h2>Browser response time</h2>
+          <button class="prt-close" aria-label="Close" (click)="open = false">&#10005;</button>
+        </div>
+
+        <div class="prt-body">
+          <div class="prt-summary">
+            Response time(ms): {{ t.responseTime }}, Network: {{ t.network }},
+            Server: {{ t.server }}, Browser: {{ t.browser }}
+          </div>
+
+          <!-- stacked proportion bar -->
+          <div class="prt-bar">
+            <div class="seg network" [style.width.%]="pct(t, t.network)"></div>
+            <div class="seg server"  [style.width.%]="pct(t, t.server)"></div>
+            <div class="seg browser" [style.width.%]="pct(t, t.browser)"></div>
+          </div>
+
+          <!-- main timing table -->
+          <table class="prt-table">
+            <thead>
+              <tr>
+                <th class="c-type">Timing Type</th>
+                <th class="c-range">Time Range</th>
+                <th class="c-total">Total Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of t.rows"
+                  [class.over]="isOverLimit(r)"
+                  [title]="overTitle(r)">
+                <td class="c-type">
+                  <span class="prt-chip" [ngClass]="r.color"></span>{{ r.label }}
+                </td>
+                <td class="c-range">{{ rangeText(r) }}</td>
+                <td class="c-total">
+                  {{ r.total }}ms<span *ngIf="isOverLimit(r)" class="prt-over-mark">&#9888;</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- browser timing detail -->
+          <div class="prt-detail" *ngIf="t.detail.length">
+            <div class="prt-detail-head">
+              <span>Browser timing detail</span>
+              <span>Time</span>
+            </div>
+            <div class="prt-detail-row" *ngFor="let d of t.detail">
+              <span class="lbl">{{ d.label }}</span>
+              <span class="val">{{ d.timeMs }} ms</span>
+            </div>
+          </div>
+
+          <div class="prt-foot">
+            Page: {{ t.page }} &nbsp;&bull;&nbsp;
+            {{ t.kind === 'full' ? 'Full page load' : 'In-app navigation' }} &nbsp;&bull;&nbsp;
+            {{ t.capturedAt | date:'HH:mm:ss' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-container>
