@@ -10,6 +10,8 @@ import { FlowsComponent } from './flows/flows.component';
 import { FlowDefinitionComponent } from './flow-definition/flow-definition.component';
 import { AllFlowsComponent } from './all-flows/all-flows.component';
 import { KeyVaultsComponent } from './key-vaults/key-vaults.component';
+import { PerformanceMonitorModule } from './performance-monitor/performance-monitor.module';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,8 @@ import { KeyVaultsComponent } from './key-vaults/key-vaults.component';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    PerformanceMonitorModule.forRoot(environment.perfMonitor)
   ],
   providers: [],
   bootstrap: [AppComponent]
